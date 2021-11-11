@@ -32,6 +32,9 @@ contract tlMinter is ERC721Enumerable, Ownable {
     // Track what tier each little is
     mapping(uint256 => uint256) littleTiers;
 
+    // Track whitelist addresses used
+    mapping(address => bool) public whitelistUsed;
+
     constructor() ERC721("TheLittles", "tls") {
         // Initia Dynamic Values (owner can change later)
         whitelistContract = tlWhitelist(
@@ -42,6 +45,7 @@ contract tlMinter is ERC721Enumerable, Ownable {
         maxPerTxn = 1;
         maxPerWallet = 1;
         _baseURI_ = "https://media.thelittles.io/";
+        payableWallet = payable(address(0xF452C6148FD24e83bbAD816835845063a8f56042)); // This is a placeholder, will change later
     }
 
     /** *********************************** **/
@@ -74,6 +78,9 @@ contract tlMinter is ERC721Enumerable, Ownable {
             "You are not on the white list"
         );
         defaultMintingRules(msg.value, quantity);
+
+        require(whitelistUsed[msg.sender] == false, "You have already minted - Only one mint per whitelist entry, please wait for pubic minting");
+
         mintTokens(quantity);
     }
 
